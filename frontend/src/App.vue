@@ -1,15 +1,30 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import brFlag from '@/assets/images/br.png'
+import usFlag from '@/assets/images/us.png'
+import '@/assets/lang-dropdown.css'
+import '@/assets/app.css'
 
 const userQuery = ref('')
 const movieSuggestions = ref<Array<{ titleKey: string; image: string }>>([])
 const isLoading = ref(false)
 
 const { locale, t } = useI18n()
+const showDropdown = ref(false)
 
-function toggleLanguage() {
-  locale.value = locale.value === 'en' ? 'pt-BR' : 'en'
+const languages = [
+  { code: 'pt-BR', label: 'Português', flag: brFlag },
+  { code: 'en', label: 'English', flag: usFlag }
+]
+
+function toggleLanguageDropdown() {
+  showDropdown.value = !showDropdown.value
+}
+
+function selectLanguage(code: string) {
+  locale.value = code
+  showDropdown.value = false
 }
 
 async function suggestMovie() {
@@ -28,20 +43,35 @@ async function suggestMovie() {
 
 <template>
   <div class="container">
-    <div class="lang-switch">
+    <div class="lang-dropdown">
       <button
-        @click="toggleLanguage"
         class="lang-btn"
-        :title="locale === 'en' ? 'Switch to Portuguese' : 'Mudar para Inglês'"
+        @click="toggleLanguageDropdown"
+        :title="$t('changeLang')"
         aria-label="Switch language"
       >
-        <span v-if="locale === 'en'">🇺🇸</span>
-        <span v-else>🇧🇷</span>
+        <img
+          :src="languages.find(l => l.code === locale)?.flag"
+          :alt="languages.find(l => l.code === locale)?.label"
+          class="flag-icon"
+        />
       </button>
+      <div v-if="showDropdown" class="dropdown">
+        <div
+          v-for="lang in languages"
+          :key="lang.code"
+          class="dropdown-item"
+          @click="selectLanguage(lang.code)"
+        >
+          <img :src="lang.flag" :alt="lang.label" class="flag-icon" />
+          <span>{{ lang.label }}</span>
+        </div>
+      </div>
     </div>
     <h1>Cinematcha</h1>
     <div class="form-area">
       <input
+        type="text"
         v-model="userQuery"
         :placeholder="$t('placeholder')"
         class="query-input"
@@ -64,85 +94,3 @@ async function suggestMovie() {
     </div>
   </div>
 </template>
-
-<style scoped>
-.container {
-  max-width: 420px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  text-align: center;
-}
-.lang-switch {
-  text-align: right;
-  margin-bottom: 1rem;
-}
-.lang-btn {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  outline: none;
-  transition: transform 0.1s;
-}
-.lang-btn:active {
-  transform: scale(0.95);
-}
-.form-area {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-.query-input {
-  flex: 1;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-}
-button {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  background: #42b983;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-button:disabled {
-  background: #b2dfdb;
-  cursor: not-allowed;
-}
-.suggestions {
-  margin-top: 2rem;
-}
-.suggestion-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.suggestion-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: #f9f9f9;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-}
-.movie-img {
-  width: 60px;
-  border-radius: 6px;
-}
-.movie-title {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-.no-results {
-  color: #aaa;
-  margin-top: 1rem;
-}
-</style>

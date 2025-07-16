@@ -1,0 +1,15 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cup base -->
+  <ellipse cx="30" cy="44" rx="14" ry="6" fill="#e0f5e9"/>
+  <ellipse cx="30" cy="39" rx="14" ry="6" fill="#b2dfdb"/>
+  <!-- Cup body -->
+  <ellipse cx="30" cy="35" rx="12" ry="7" fill="#fff"/>
+  <!-- Matcha liquid -->
+  <ellipse cx="30" cy="35" rx="9" ry="4" fill="#7ed957"/>
+  <!-- Play symbol (central, sobre o matcha) -->
+  <polygon points="28,32 28,38 34,35" fill="#228b22"/>
+  <!-- Cup handle -->
+  <path d="M42 33 Q48 37 42 41" stroke="#b2dfdb" stroke-width="2" fill="none"/>
+  <!-- Steam (opcional) -->
+  <path d="M26 27 Q28 23 30 27" stroke="#2ecc40" stroke-width="1.5" fill="none"/>
+</svg>
