@@ -1,0 +1,10 @@
+{
+  "placeholder": "Descreva que tipo de filme você quer...",
+  "button": "Me sugira um filme",
+  "suggestions": "Sugestões",
+  "noResults": "Nenhuma sugestão ainda.",
+  "movie": {
+    "inception": "A Origem",
+    "interstellar": "Interestelar"
+  }
+} 

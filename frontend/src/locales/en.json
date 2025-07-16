@@ -1,0 +1,10 @@
+{
+  "placeholder": "Describe what kind of movie you want...",
+  "button": "Suggest me a movie",
+  "suggestions": "Suggestions",
+  "noResults": "No suggestions yet.",
+  "movie": {
+    "inception": "Inception",
+    "interstellar": "Interstellar"
+  }
+} 
