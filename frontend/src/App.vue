@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import brFlag from '@/assets/images/br.png'
 import usFlag from '@/assets/images/us.png'
@@ -39,6 +39,21 @@ async function suggestMovie() {
     isLoading.value = false
   }, 1200)
 }
+
+const autoTextarea = ref<HTMLTextAreaElement | null>(null)
+function autoResize() {
+  const el = autoTextarea.value
+  if (el) {
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }
+}
+onMounted(() => {
+  autoResize()
+})
+watch(userQuery, () => {
+  autoResize()
+})
 </script>
 
 <template>
@@ -68,14 +83,18 @@ async function suggestMovie() {
         </div>
       </div>
     </div>
-    <h1>Cinematcha</h1>
+    <h1>
+      <span class="cine">Cine</span><span class="matcha">matcha</span>
+    </h1>
     <div class="form-area">
-      <input
-        type="text"
+      <textarea
         v-model="userQuery"
         :placeholder="$t('placeholder')"
         class="query-input"
-        @keyup.enter="suggestMovie"
+        rows="1"
+        ref="autoTextarea"
+        @input="autoResize"
+        style="resize: none; overflow: hidden;"
       />
       <button @click="suggestMovie" :disabled="isLoading || !userQuery.trim()">
         <span v-if="!isLoading">{{ $t('button') }}</span>
@@ -87,8 +106,7 @@ async function suggestMovie() {
       <div v-if="movieSuggestions.length === 0 && !isLoading" class="no-results">{{ $t('noResults') }}</div>
       <div v-else class="suggestion-list">
         <div v-for="(movie, idx) in movieSuggestions" :key="idx" class="suggestion-item">
-          <img :src="movie.image" :alt="$t(movie.titleKey)" class="movie-img" />
-          <div class="movie-title">{{ $t(movie.titleKey) }}</div>
+          <img :src="movie.image" :alt="$t(movie.titleKey) + ' poster'" class="movie-img" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />          <div class="movie-title">{{ $t(movie.titleKey) }}</div>
         </div>
       </div>
     </div>
