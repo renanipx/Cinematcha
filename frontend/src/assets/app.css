@@ -3,7 +3,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f6f8fa;
+  background: #f6fefa;
   margin: 0;
 }
 
@@ -11,7 +11,7 @@ body {
   min-width: 0;
   margin: 0 1rem;
   padding: 2.5rem 2rem;
-  background: #fff;
+  background: #ffffff ;
   border-radius: 18px;
   box-shadow: 0 4px 32px rgba(0,0,0,0.10);
   text-align: center;
@@ -189,5 +189,70 @@ button {
   button {
     width: 100%;
     box-sizing: border-box;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .container {
+    max-width: 420px;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+  }
+  .suggestion-list, .suggestion-item {
+    max-width: 380px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .container {
+    max-width: 600px;
+    padding: 5rem 3.5rem;
+    border-radius: 28px;
+    min-height: 700px;
+    box-shadow: 0 8px 48px 0 rgba(34, 139, 34, 0.18), 0 1.5px 8px 0 rgba(0,0,0,0.10);
+    transition: box-shadow 0.25s;
+  }
+  .container:hover {
+    box-shadow: 0 16px 64px 0 rgba(34, 139, 34, 0.22), 0 3px 16px 0 rgba(0,0,0,0.13);
+  }
+  h1 {
+    font-size: 3.2rem;
+    margin-bottom: 2.2rem;
+  }
+  .form-area button {
+    font-size: 1.35em;
+    padding: 1.1em 0;
+  }
+  .query-input {
+    font-size: 1.25rem;
+  }
+  .suggestions h2 {
+    font-size: 1.7rem;
+  }
+  .movie-title {
+    font-size: 1.35em;
+  }
+  .suggestion-list, .suggestion-item {
+    max-width: 520px;
+  }
+  .movie-img {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 0.7rem 0.2rem;
+  }
+  h1 {
+    font-size: 1.3rem;
+  }
+  .form-area button {
+    font-size: 1em;
+    padding: 0.5em 0;
+  }
+  .movie-title {
+    font-size: 1em;
   }
 } 
