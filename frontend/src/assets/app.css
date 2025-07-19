@@ -3,7 +3,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f6fefa 0%, #eafaf1 100%);
+  background: #f6fefa;
   margin: 0;
 }
 
@@ -11,14 +11,13 @@ body {
   min-width: 0;
   margin: 0 1rem;
   padding: 2.5rem 2rem;
-  background: rgba(255, 255, 255, 0.85);
+  background: #ffffff ;
   border-radius: 18px;
   box-shadow: 0 4px 32px rgba(0,0,0,0.10);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  backdrop-filter: blur(6px);
 }
 
 .lang-dropdown {
