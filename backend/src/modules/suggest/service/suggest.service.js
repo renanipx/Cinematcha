@@ -1,17 +1,14 @@
 const axios = require('axios');
 
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/gpt2'; // More reliable free model
-const TMDB_API_URL = 'https://api.themoviedb.org/3';
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 async function fetchMovieDetailsFromTMDB(title) {
-  const searchUrl = `${TMDB_API_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+  const searchUrl = `${process.env.TMDB_API_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
   const searchRes = await axios.get(searchUrl);
   const movie = searchRes.data.results && searchRes.data.results[0];
   if (!movie) return null;
 
   // Search for trailer
-  const videosUrl = `${TMDB_API_URL}/movie/${movie.id}/videos?api_key=${TMDB_API_KEY}`;
+  const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}`;
   const videosRes = await axios.get(videosUrl);
   const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
 
@@ -45,7 +42,7 @@ async function suggestMovies(preferences) {
     try {
       const prompt = `Suggest 5 popular movies available on TMDB based on preferences: ${JSON.stringify(preferences)}. Return only movie names separated by commas.`;
       
-      const iaRes = await axios.post(HUGGINGFACE_API_URL, {
+      const iaRes = await axios.post(process.env.HUGGINGFACE_API_URL, {
         inputs: prompt,
       }, {
         headers: {

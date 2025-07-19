@@ -7,7 +7,8 @@ import '@/assets/lang-dropdown.css'
 import '@/assets/app.css'
 
 const userQuery = ref('')
-const movieSuggestions = ref<Array<{ titleKey: string; image: string }>>([])
+const movieSuggestions = ref<Array<any>>([])
+const selectedMovie = ref<any>(null)
 const isLoading = ref(false)
 
 const { locale, t } = useI18n()
@@ -27,17 +28,28 @@ function selectLanguage(code: string) {
   showDropdown.value = false
 }
 
+function selectMovie(movie: any) {
+  selectedMovie.value = movie
+}
+
 async function suggestMovie() {
   isLoading.value = true
   movieSuggestions.value = []
-  setTimeout(() => {
-    // Mock suggestions with i18n keys
-    movieSuggestions.value = [
-      { titleKey: 'movie.inception', image: 'https://image.tmdb.org/t/p/w200/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg' },
-      { titleKey: 'movie.interstellar', image: 'https://image.tmdb.org/t/p/w200/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg' }
-    ]
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL
+    const response = await fetch(`${apiUrl}/suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: userQuery.value })
+    })
+    if (!response.ok) throw new Error('Failed to fetch suggestions')
+    const movies = await response.json()
+    movieSuggestions.value = movies
+  } catch (error) {
+    movieSuggestions.value = []
+  } finally {
     isLoading.value = false
-  }, 1200)
+  }
 }
 
 const autoTextarea = ref<HTMLTextAreaElement | null>(null)
@@ -105,10 +117,24 @@ watch(userQuery, () => {
       <h2>{{ $t('suggestions') }}</h2>
       <div v-if="movieSuggestions.length === 0 && !isLoading" class="no-results">{{ $t('noResults') }}</div>
       <div v-else class="suggestion-list">
-        <div v-for="(movie, idx) in movieSuggestions" :key="idx" class="suggestion-item">
-          <img :src="movie.image" :alt="$t(movie.titleKey) + ' poster'" class="movie-img" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />          <div class="movie-title">{{ $t(movie.titleKey) }}</div>
+        <div v-for="(movie, idx) in movieSuggestions" :key="idx" class="suggestion-item" @click="selectMovie(movie)" style="cursor:pointer">
+          <img :src="movie.poster" :alt="movie.title + ' poster'" class="movie-img" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />
+          <div class="movie-title">{{ movie.title }}</div>
         </div>
       </div>
+    </div>
+    <div v-if="selectedMovie" class="movie-details" style="position:fixed; top:60px; right:40px; width:400px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:24px; border-radius:12px; z-index:10;">
+      <h3>{{ selectedMovie.title }}</h3>
+      <p>{{ selectedMovie.overview }}</p>
+      <iframe
+        v-if="selectedMovie.trailer"
+        :src="selectedMovie.trailer.replace('watch?v=', 'embed/')"
+        width="100%"
+        height="225"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
+      <button style="margin-top:12px" @click="selectedMovie = null">Fechar</button>
     </div>
   </div>
 </template>
