@@ -5,6 +5,7 @@ import brFlag from '@/assets/images/br.png'
 import usFlag from '@/assets/images/us.png'
 import '@/assets/lang-dropdown.css'
 import '@/assets/app.css'
+import '@/assets/rule-box.css'
 
 const userQuery = ref('')
 const movieSuggestions = ref<Array<any>>([])
@@ -66,6 +67,15 @@ onMounted(() => {
 watch(userQuery, () => {
   autoResize()
 })
+
+onMounted(() => {
+  window.addEventListener('keydown', handleEsc)
+})
+function handleEsc(e) {
+  if (e.key === 'Escape' && selectedMovie.value) {
+    selectedMovie.value = null
+  }
+}
 </script>
 
 <template>
@@ -123,18 +133,32 @@ watch(userQuery, () => {
         </div>
       </div>
     </div>
-    <div v-if="selectedMovie" class="movie-details" style="position:fixed; top:60px; right:40px; width:400px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:24px; border-radius:12px; z-index:10;">
-      <h3>{{ selectedMovie.title }}</h3>
-      <p>{{ selectedMovie.overview }}</p>
-      <iframe
-        v-if="selectedMovie.trailer"
-        :src="selectedMovie.trailer.replace('watch?v=', 'embed/')"
-        width="100%"
-        height="225"
-        frameborder="0"
-        allowfullscreen
-      ></iframe>
-      <button style="margin-top:12px" @click="selectedMovie = null">Fechar</button>
-    </div>
+    <Teleport to="body">
+      <div v-if="selectedMovie">
+        <div class="modal-backdrop"></div>
+        <div
+          class="movie-details rule-box"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          aria-describedby="modal-desc"
+        >
+          <div class="details-header">
+            <h3 id="modal-title" class="movie-title">{{ selectedMovie.title }}</h3>
+            <button class="close-btn" @click="selectedMovie = null" aria-label="Fechar detalhes">&times;</button>
+          </div>
+          <p id="modal-desc" class="movie-overview">{{ selectedMovie.overview }}</p>
+          <iframe
+            v-if="selectedMovie.trailer"
+            :src="selectedMovie.trailer.replace('watch?v=', 'embed/')"
+            width="100%"
+            height="225"
+            frameborder="0"
+            allowfullscreen
+            style="margin-bottom: 18px;"
+          ></iframe>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
