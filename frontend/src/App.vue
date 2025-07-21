@@ -41,7 +41,7 @@ async function suggestMovie() {
     const response = await fetch(`${apiUrl}/suggest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: userQuery.value })
+      body: JSON.stringify({ query: userQuery.value, language: locale.value })
     })
     if (!response.ok) throw new Error('Failed to fetch suggestions')
     const movies = await response.json()
@@ -67,6 +67,12 @@ onMounted(() => {
 watch(userQuery, () => {
   autoResize()
 })
+
+watch(locale, (newLocale, oldLocale) => {
+  if (userQuery.value.trim()) {
+    suggestMovie();
+  }
+});
 
 onMounted(() => {
   window.addEventListener('keydown', handleEsc)

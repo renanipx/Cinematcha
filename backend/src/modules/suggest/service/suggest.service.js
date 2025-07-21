@@ -1,14 +1,14 @@
 const axios = require('axios');
 
 
-async function fetchMovieDetailsFromTMDB(title) {
-  const searchUrl = `${process.env.TMDB_API_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+async function fetchMovieDetailsFromTMDB(title, language = 'en-US') {
+  const searchUrl = `${process.env.TMDB_API_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=${language}`;
   const searchRes = await axios.get(searchUrl);
   const movie = searchRes.data.results && searchRes.data.results[0];
   if (!movie) return null;
 
   // Search for trailer
-  const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}`;
+  const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
   const videosRes = await axios.get(videosUrl);
   const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
 
@@ -20,7 +20,7 @@ async function fetchMovieDetailsFromTMDB(title) {
   };
 }
 
-async function suggestMovies(preferences) {
+async function suggestMovies(preferences, language = 'en-US') {
   try {
     // Check if API keys are configured
     if (!process.env.HUGGINGFACE_API_KEY || !process.env.TMDB_API_KEY) {
@@ -65,7 +65,7 @@ async function suggestMovies(preferences) {
     const validatedMovies = [];
     for (const name of movieNames) {
       try {
-        const details = await fetchMovieDetailsFromTMDB(name);
+        const details = await fetchMovieDetailsFromTMDB(name, language);
         if (details && details.poster && details.overview && details.trailer) {
           validatedMovies.push(details);
         }
