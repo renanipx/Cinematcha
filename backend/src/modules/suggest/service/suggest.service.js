@@ -27,21 +27,9 @@ async function suggestMovies(preferences, language = 'en-US') {
       throw new Error('API keys not configured. Please check your .env file.');
     }
 
-    // For now, let's use a simple fallback approach since HuggingFace can be unreliable
-    const fallbackMovies = [
-      'The Dark Knight',
-      'Inception', 
-      'Interstellar',
-      'The Matrix',
-      'Pulp Fiction'
-    ];
-
-    // Try HuggingFace first, fallback to predefined list
-    let movieNames = fallbackMovies;
-    
+    let movieNames = [];
     try {
       const prompt = `Suggest 5 popular movies available on TMDB based on preferences: ${JSON.stringify(preferences)}. Return only movie names separated by commas.`;
-      
       const iaRes = await axios.post(process.env.HUGGINGFACE_API_URL, {
         inputs: prompt,
       }, {
@@ -50,15 +38,15 @@ async function suggestMovies(preferences, language = 'en-US') {
           'Content-Type': 'application/json',
         },
       });
-
       const responseText = iaRes.data[0]?.generated_text || '';
       const aiMovieNames = responseText.split(',').map(s => s.trim()).filter(name => name.length > 0);
-      
       if (aiMovieNames.length > 0) {
         movieNames = aiMovieNames;
+      } else {
+        throw new Error('No movie names returned by AI.');
       }
     } catch (aiError) {
-      console.log('AI service unavailable, using fallback movies:', aiError.message);
+      throw new Error('AI service unavailable or returned no results: ' + aiError.message);
     }
 
     // Validate and fetch details from TMDB
@@ -75,7 +63,7 @@ async function suggestMovies(preferences, language = 'en-US') {
     }
     
     if (validatedMovies.length === 0) {
-      throw new Error('No movies found. Please check your TMDB API key.');
+      throw new Error('No movies found. Please check your TMDB API key or the AI response.');
     }
     
     return validatedMovies;
