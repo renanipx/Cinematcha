@@ -1,5 +1,5 @@
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const axios = require('axios');
-
 
 async function fetchMovieDetailsFromTMDB(title, language = 'en-US') {
   const searchUrl = `${process.env.TMDB_API_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=${language}`;
@@ -22,31 +22,31 @@ async function fetchMovieDetailsFromTMDB(title, language = 'en-US') {
 
 async function suggestMovies(preferences, language = 'en-US') {
   try {
-    // Check if API keys are configured
-    if (!process.env.HUGGINGFACE_API_KEY || !process.env.TMDB_API_KEY) {
-      throw new Error('API keys not configured. Please check your .env file.');
+    if (!process.env.TMDB_API_KEY) {
+      throw new Error('TMDB API key not configured. Please check your .env file.');
     }
 
     let movieNames = [];
     try {
-      const prompt = `Suggest 5 popular movies available on TMDB based on preferences: ${JSON.stringify(preferences)}. Return only movie names separated by commas.`;
-      const iaRes = await axios.post(process.env.HUGGINGFACE_API_URL, {
-        inputs: prompt,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const responseText = iaRes.data[0]?.generated_text || '';
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' });
+      let prompt;
+      if ((language && language.toLowerCase().startsWith('pt'))) {
+        prompt = `Sugira 5 filmes populares baseados na seguinte preferência: ${JSON.stringify(preferences)}. Liste apenas os nomes, separados por vírgula.`;
+      } else {
+        prompt = `Suggest 5 popular movies based on the following preferences: ${JSON.stringify(preferences)}. List only the names, separated by commas.`;
+      }
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const responseText = response.text();
       const aiMovieNames = responseText.split(',').map(s => s.trim()).filter(name => name.length > 0);
       if (aiMovieNames.length > 0) {
         movieNames = aiMovieNames;
       } else {
-        throw new Error('No movie names returned by AI.');
+        throw new Error('No movie names returned by Gemini AI.');
       }
     } catch (aiError) {
-      throw new Error('AI service unavailable or returned no results: ' + aiError.message);
+      throw new Error('Gemini AI service unavailable or returned no results: ' + aiError.message);
     }
 
     // Validate and fetch details from TMDB
@@ -63,7 +63,7 @@ async function suggestMovies(preferences, language = 'en-US') {
     }
     
     if (validatedMovies.length === 0) {
-      throw new Error('No movies found. Please check your TMDB API key or the AI response.');
+      throw new Error('No movies found. Please check your TMDB API key or the Gemini AI response.');
     }
     
     return validatedMovies;
