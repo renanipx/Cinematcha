@@ -29,12 +29,14 @@ async function suggestMovies(preferences, language = 'en-US') {
     let movieNames = [];
     try {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
       let prompt;
       if ((language && language.toLowerCase().startsWith('pt'))) {
-        prompt = `Sugira 5 filmes populares baseados na seguinte preferência: ${JSON.stringify(preferences)}. Liste apenas os nomes, separados por vírgula.`;
+        prompt = `O usuário solicitou filmes semelhantes a: "${JSON.stringify(preferences)}". 
+                 Analise o gênero, o estilo, os temas centrais, a narrativa e o enredo desse filme. Com base nisso, recomende 10 filmes populares e recentes que tenham características semelhantes e que provavelmente existam na base do TMDB. Retorne apenas os títulos dos filmes, separados por vírgula.`;
       } else {
-        prompt = `Suggest 5 popular movies based on the following preferences: ${JSON.stringify(preferences)}. List only the names, separated by commas.`;
+        prompt = `The user requested movies similar to: "${JSON.stringify(preferences)}". 
+                 Analyze the genre, style, core themes, narrative, and plot of this movie. Based on that, recommend 10 recent and popular movies that share similar characteristics and most likely exist in the TMDB database. Return only the movie titles, separated by commas.`;
       }
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -61,11 +63,11 @@ async function suggestMovies(preferences, language = 'en-US') {
         console.log(`Error fetching details for ${name}:`, movieError.message);
       }
     }
-    
+
     if (validatedMovies.length === 0) {
       throw new Error('No movies found. Please check your TMDB API key or the Gemini AI response.');
     }
-    
+
     return validatedMovies;
   } catch (error) {
     throw new Error(`Suggestion service error: ${error.message}`);
