@@ -6,5 +6,12 @@
   "movie": {
     "inception": "Inception",
     "interstellar": "Interstellar"
+  },
+  "tab": {
+    "search": "Search",
+    "trending": "Trending",
+    "popular": "Most Popular",
+    "today": "Today",
+    "week": "This Week"
   }
 } 

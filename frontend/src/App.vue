@@ -6,6 +6,7 @@ import usFlag from '@/assets/images/us.png'
 import '@/assets/lang-dropdown.css'
 import '@/assets/app.css'
 import '@/assets/rule-box.css'
+import axios from 'axios'
 
 const userQuery = ref('')
 const movieSuggestions = ref<Array<any>>([])
@@ -52,6 +53,28 @@ async function suggestMovie() {
     isLoading.value = false
   }
 }
+
+const activeTab = ref('search') // 'search', 'trending', 'popular'
+const trendingPeriod = ref('day') // 'day' or 'week'
+const trendingMovies = ref([])
+const popularMovies = ref([])
+
+async function fetchTrending() {
+  const apiUrl = import.meta.env.VITE_API_URL
+  const response = await fetch(`${apiUrl}/tmdb/trending?period=${trendingPeriod.value}&language=${locale.value}`)
+  trendingMovies.value = await response.json()
+}
+
+async function fetchPopular() {
+  const apiUrl = import.meta.env.VITE_API_URL
+  const response = await fetch(`${apiUrl}/tmdb/popular?language=${locale.value}`)
+  popularMovies.value = await response.json()
+}
+
+watch([activeTab, trendingPeriod, locale], async ([tab]) => {
+  if (tab === 'trending') await fetchTrending()
+  if (tab === 'popular') await fetchPopular()
+})
 
 const autoTextarea = ref<HTMLTextAreaElement | null>(null)
 function autoResize() {
@@ -114,28 +137,57 @@ function handleEsc(e) {
     <h1>
       <span class="cine">Cine</span><span class="matcha">matcha</span>
     </h1>
-    <div class="form-area">
-      <textarea
-        v-model="userQuery"
-        :placeholder="$t('placeholder')"
-        class="query-input"
-        rows="1"
-        ref="autoTextarea"
-        @input="autoResize"
-        style="resize: none; overflow: hidden;"
-      />
-      <button @click="suggestMovie" :disabled="isLoading || !userQuery.trim()">
-        <span v-if="!isLoading">{{ $t('button') }}</span>
-        <span v-else>...</span>
-      </button>
+    <div class="tabs">
+      <button :class="{active: activeTab === 'search'}" @click="activeTab = 'search'">{{$t('tab.search')}}</button>
+      <button :class="{active: activeTab === 'trending'}" @click="activeTab = 'trending'">{{$t('tab.trending')}}</button>
+      <button :class="{active: activeTab === 'popular'}" @click="activeTab = 'popular'">{{$t('tab.popular')}}</button>
     </div>
-    <div class="suggestions">
-      <h2>{{ $t('suggestions') }}</h2>
-      <div v-if="movieSuggestions.length === 0 && !isLoading" class="no-results">{{ $t('noResults') }}</div>
-      <div v-else class="suggestion-list">
-        <div v-for="(movie, idx) in movieSuggestions" :key="idx" class="suggestion-item" @click="selectMovie(movie)" style="cursor:pointer">
-          <img :src="movie.poster" :alt="movie.title + ' poster'" class="movie-img" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />
+    <div v-if="activeTab === 'trending'" class="sub-tabs">
+      <button :class="{active: trendingPeriod === 'day'}" @click="trendingPeriod = 'day'">{{$t('tab.today')}}</button>
+      <button :class="{active: trendingPeriod === 'week'}" @click="trendingPeriod = 'week'">{{$t('tab.week')}}</button>
+    </div>
+    <div v-if="activeTab === 'search'">
+      <div class="form-area">
+        <textarea
+          v-model="userQuery"
+          :placeholder="$t('placeholder')"
+          class="query-input"
+          rows="1"
+          ref="autoTextarea"
+          @input="autoResize"
+          style="resize: none; overflow: hidden;"
+        />
+        <button @click="suggestMovie" :disabled="isLoading || !userQuery.trim()">
+          <span v-if="!isLoading">{{ $t('button') }}</span>
+          <span v-else>...</span>
+        </button>
+      </div>
+      <div class="suggestions">
+        <h2>{{ $t('suggestions') }}</h2>
+        <div v-if="movieSuggestions.length === 0 && !isLoading" class="no-results">{{ $t('noResults') }}</div>
+        <div v-else class="suggestion-list">
+          <div v-for="(movie, idx) in movieSuggestions" :key="idx" class="suggestion-item" @click="selectMovie(movie)" style="cursor:pointer">
+            <img :src="movie.poster" :alt="movie.title + ' poster'" class="movie-img" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />
+            <div class="movie-title">{{ movie.title }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="activeTab === 'trending'">
+      <div class="trending-list">
+        <div v-for="movie in trendingMovies" :key="movie.id" class="trending-item">
+          <img :src="movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : ''" :alt="movie.title" />
           <div class="movie-title">{{ movie.title }}</div>
+          <div class="movie-date">{{ movie.release_date }}</div>
+        </div>
+      </div>
+    </div>
+    <div v-else-if="activeTab === 'popular'">
+      <div class="popular-list">
+        <div v-for="movie in popularMovies" :key="movie.id" class="popular-item">
+          <img :src="movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : ''" :alt="movie.title" />
+          <div class="movie-title">{{ movie.title }}</div>
+          <div class="movie-date">{{ movie.release_date }}</div>
         </div>
       </div>
     </div>

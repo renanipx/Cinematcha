@@ -6,5 +6,12 @@
   "movie": {
     "inception": "A Origem",
     "interstellar": "Interestelar"
+  },
+  "tab": {
+    "search": "Pesquisar",
+    "trending": "Tendências",
+    "popular": "Mais Populares",
+    "today": "Hoje",
+    "week": "Esta Semana"
   }
 } 
