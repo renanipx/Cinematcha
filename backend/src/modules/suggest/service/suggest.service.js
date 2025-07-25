@@ -74,4 +74,52 @@ async function suggestMovies(preferences, language = 'en-US') {
   }
 }
 
-module.exports = { suggestMovies }; 
+async function getTrendingMovies(period = 'day', language = 'en-US') {
+  try {
+    const url = `${process.env.TMDB_API_URL}/trending/movie/${period}?api_key=${process.env.TMDB_API_KEY}&language=en-US`;
+    const res = await axios.get(url);
+    const validatedMovies = [];
+    for (const movie of res.data.results) {
+      try {
+        const details = await fetchMovieDetailsFromTMDB(movie.title, language);
+        if (details && details.poster && details.overview && details.trailer) {
+          validatedMovies.push(details);
+        }
+      } catch (movieError) {
+        console.log(`Error fetching details for ${movie.title}:`, movieError.message);
+      }
+    }
+    if (validatedMovies.length === 0) {
+      throw new Error('No trending movies found with complete details.');
+    }
+    return validatedMovies;
+  } catch (error) {
+    throw new Error('Failed to fetch trending movies from TMDB: ' + error.message);
+  }
+}
+
+async function getPopularMovies(language = 'en-US') {
+  try {
+    const url = `${process.env.TMDB_API_URL}/movie/popular?api_key=${process.env.TMDB_API_KEY}&language=en-US`;
+    const res = await axios.get(url);
+    const validatedMovies = [];
+    for (const movie of res.data.results) {
+      try {
+        const details = await fetchMovieDetailsFromTMDB(movie.title, language);
+        if (details && details.poster && details.overview && details.trailer) {
+          validatedMovies.push(details);
+        }
+      } catch (movieError) {
+        console.log(`Error fetching details for ${movie.title}:`, movieError.message);
+      }
+    }
+    if (validatedMovies.length === 0) {
+      throw new Error('No popular movies found with complete details.');
+    }
+    return validatedMovies;
+  } catch (error) {
+    throw new Error('Failed to fetch popular movies from TMDB: ' + error.message);
+  }
+}
+
+module.exports = { suggestMovies, getTrendingMovies, getPopularMovies }; 

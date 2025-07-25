@@ -12,4 +12,24 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.get('/tmdb/trending', async (req, res) => {
+  try {
+    const { period = 'day', language = 'en-US' } = req.query;
+    const movies = await suggestService.getTrendingMovies(period, language);
+    res.json(movies);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/tmdb/popular', async (req, res) => {
+  try {
+    const { language = 'en-US' } = req.query;
+    const movies = await suggestService.getPopularMovies(language);
+    res.json(movies);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router; 

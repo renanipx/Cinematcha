@@ -60,21 +60,23 @@ const trendingMovies = ref([])
 const popularMovies = ref([])
 
 async function fetchTrending() {
-  const apiUrl = import.meta.env.VITE_API_URL
-  const response = await fetch(`${apiUrl}/tmdb/trending?period=${trendingPeriod.value}&language=${locale.value}`)
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/suggest/tmdb/trending?period=${trendingPeriod.value}&language=${locale.value}`)
   trendingMovies.value = await response.json()
 }
 
 async function fetchPopular() {
-  const apiUrl = import.meta.env.VITE_API_URL
-  const response = await fetch(`${apiUrl}/tmdb/popular?language=${locale.value}`)
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/suggest/tmdb/popular?language=${locale.value}`)
   popularMovies.value = await response.json()
 }
 
-watch([activeTab, trendingPeriod, locale], async ([tab]) => {
-  if (tab === 'trending') await fetchTrending()
-  if (tab === 'popular') await fetchPopular()
+watch([activeTab, locale], async ([tab]) => {
+  if (tab === 'trending') await fetchTrending();
+  if (tab === 'popular') await fetchPopular();
 })
+
+watch(trendingPeriod, async () => {
+  if (activeTab.value === 'trending') await fetchTrending();
+});
 
 const autoTextarea = ref<HTMLTextAreaElement | null>(null)
 function autoResize() {
@@ -85,6 +87,8 @@ function autoResize() {
   }
 }
 onMounted(() => {
+  if (activeTab.value === 'trending') fetchTrending();
+  if (activeTab.value === 'popular') fetchPopular();
   autoResize()
 })
 watch(userQuery, () => {
@@ -175,19 +179,17 @@ function handleEsc(e) {
     </div>
     <div v-else-if="activeTab === 'trending'">
       <div class="trending-list">
-        <div v-for="movie in trendingMovies" :key="movie.id" class="trending-item">
-          <img :src="movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : ''" :alt="movie.title" />
+        <div v-for="movie in trendingMovies" :key="movie.id" class="trending-item" @click="selectMovie(movie)" style="cursor:pointer">
           <div class="movie-title">{{ movie.title }}</div>
-          <div class="movie-date">{{ movie.release_date }}</div>
+          <img :src="movie.poster" :alt="movie.title" class="movie-img" />
         </div>
       </div>
     </div>
     <div v-else-if="activeTab === 'popular'">
       <div class="popular-list">
-        <div v-for="movie in popularMovies" :key="movie.id" class="popular-item">
-          <img :src="movie.poster_path ? 'https://image.tmdb.org/t/p/w500' + movie.poster_path : ''" :alt="movie.title" />
+        <div v-for="movie in popularMovies" :key="movie.id" class="popular-item" @click="selectMovie(movie)" style="cursor:pointer">
           <div class="movie-title">{{ movie.title }}</div>
-          <div class="movie-date">{{ movie.release_date }}</div>
+          <img :src="movie.poster" :alt="movie.title" class="movie-img" />
         </div>
       </div>
     </div>
