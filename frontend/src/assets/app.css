@@ -1,14 +1,3 @@
-body {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f6fefa;
-  margin: 0;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
 .container {
   min-width: 0;
   margin: 0 auto;
