@@ -14,6 +14,7 @@ async function fetchMovieDetailsFromTMDB(title, language = 'en-US') {
 
   return {
     title: movie.title,
+    id: movie.id,
     poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
     overview: movie.overview,
     trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
@@ -122,4 +123,58 @@ async function getPopularMovies(language = 'en-US') {
   }
 }
 
-module.exports = { suggestMovies, getTrendingMovies, getPopularMovies }; 
+async function getWatchProviders(movieId, country = 'BR') {
+  const url = `${process.env.TMDB_API_URL}/movie/${movieId}/watch/providers?api_key=${process.env.TMDB_API_KEY}`;
+  const res = await axios.get(url);
+  console.log(`TMDB Watch Providers - Movie ID: ${movieId}, Country: ${country}`);
+  console.log('TMDB Response:', JSON.stringify(res.data, null, 2));
+  const data = res.data.results && res.data.results[country];
+  console.log(`Data for country ${country}:`, data);
+  if (!data) {
+    console.log('No providers found for this movie. Testing with a popular movie...');
+    // Test with a popular movie (Fight Club - ID: 550) to verify functionality
+    const testUrl = `${process.env.TMDB_API_URL}/movie/550/watch/providers?api_key=${process.env.TMDB_API_KEY}`;
+    const testRes = await axios.get(testUrl);
+    const testData = testRes.data.results && testRes.data.results[country];
+    console.log('Test movie providers:', testData);
+    if (testData) {
+      console.log('Provider functionality is working - the original movie just has no providers');
+    }
+    return [];
+  }
+  const allProviders = [];
+ 
+  if (data.flatrate) {
+    for (const p of data.flatrate) {
+      allProviders.push({
+        name: p.provider_name,
+        type: 'stream',
+        url: data.link,
+        icon: `https://image.tmdb.org/t/p/w92${p.logo_path}`
+      });
+    }
+  }
+  if (data.rent) {
+    for (const p of data.rent) {
+      allProviders.push({
+        name: p.provider_name,
+        type: 'rent',
+        url: data.link,
+        icon: `https://image.tmdb.org/t/p/w92${p.logo_path}`
+      });
+    }
+  }
+  if (data.buy) {
+    for (const p of data.buy) {
+      allProviders.push({
+        name: p.provider_name,
+        type: 'buy',
+        url: data.link,
+        icon: `https://image.tmdb.org/t/p/w92${p.logo_path}`
+      });
+    }
+  }
+  return allProviders;
+}
+
+module.exports = { suggestMovies, getTrendingMovies, getPopularMovies, getWatchProviders }; 

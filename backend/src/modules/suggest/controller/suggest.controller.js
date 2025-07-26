@@ -32,4 +32,15 @@ router.get('/tmdb/popular', async (req, res) => {
   }
 });
 
+router.get('/tmdb/providers/:movieId', async (req, res) => {
+  try {
+    const { movieId } = req.params;
+    const { country = 'BR' } = req.query;
+    const providers = await suggestService.getWatchProviders(movieId, country);
+    res.json(providers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router; 
