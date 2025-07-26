@@ -6,6 +6,7 @@ import usFlag from '@/assets/images/us.png'
 import '@/assets/lang-dropdown.css'
 import '@/assets/app.css'
 import '@/assets/rule-box.css'
+import '@/assets/responsive.css'
 import axios from 'axios'
 
 const userQuery = ref('')
@@ -240,11 +241,11 @@ function openProviderUrl(url: string) {
         <div v-if="movieSuggestions.length === 0 && !isLoading" class="no-results">{{ $t('noResults') }}</div>
         <div v-else class="suggestion-list">
           <div v-for="(movie, idx) in movieSuggestions" :key="idx" class="suggestion-item" @click="selectMovie(movie)" style="cursor:pointer; position:relative; background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #e8e8e8; hover:box-shadow: 0 8px 25px rgba(0,0,0,0.15); hover:transform: translateY(-4px); hover:border-color: #27ae60;">
-            <div style="display: flex; align-items: center; gap: 16px;">
-              <img :src="movie.poster" :alt="movie.title + ' poster'" class="movie-img" style="width: 60px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s ease;" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />
-              <div style="flex: 1;">
-                <div class="movie-title" style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; transition: color 0.3s ease;">{{ movie.title }}</div>
-                <div style="display: flex; align-items: center; gap: 12px; color: #7f8c8d; font-size: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <img :src="movie.poster" :alt="movie.title + ' poster'" class="movie-img" style="width: 60px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s ease; flex-shrink: 0;" @error="(e) => ((e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg')" />
+              <div style="flex: 1; min-width: 0;">
+                <div class="movie-title" style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; transition: color 0.3s ease; word-wrap: break-word;">{{ movie.title }}</div>
+                <div style="display: flex; align-items: center; gap: 12px; color: #7f8c8d; font-size: 0.85rem; flex-wrap: wrap;">
                   <span>{{ movie.year || movie.releaseDate?.split('-')[0] || 'N/A' }}</span>
                   <span v-if="movie.rating && movie.rating > 0" style="color: #f39c12; font-weight: 500;">⭐ {{ movie.rating }}/10</span>
                   <span v-if="movie.voteCount && movie.voteCount > 0" style="color: #5a6c7d;">({{ movie.voteCount.toLocaleString() }} {{ $t('votes') }})</span>
@@ -259,11 +260,11 @@ function openProviderUrl(url: string) {
     <div v-else-if="activeTab === 'trending'">
       <div class="trending-list">
         <div v-for="movie in trendingMovies" :key="movie.id" class="suggestion-item" @click="selectMovie(movie)" style="cursor:pointer; background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #e8e8e8; hover:box-shadow: 0 8px 25px rgba(0,0,0,0.15); hover:transform: translateY(-4px); hover:border-color: #27ae60;">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <img :src="movie.poster" :alt="movie.title" class="movie-img" style="width: 60px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s ease;" />
-            <div style="flex: 1;">
-              <div class="movie-title" style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; transition: color 0.3s ease;">{{ movie.title }}</div>
-              <div style="display: flex; align-items: center; gap: 12px; color: #7f8c8d; font-size: 0.85rem;">
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <img :src="movie.poster" :alt="movie.title" class="movie-img" style="width: 60px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s ease; flex-shrink: 0;" />
+            <div style="flex: 1; min-width: 0;">
+              <div class="movie-title" style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; transition: color 0.3s ease; word-wrap: break-word;">{{ movie.title }}</div>
+              <div style="display: flex; align-items: center; gap: 12px; color: #7f8c8d; font-size: 0.85rem; flex-wrap: wrap;">
                 <span>{{ movie.year || movie.releaseDate?.split('-')[0] || 'N/A' }}</span>
                 <span v-if="movie.rating && movie.rating > 0" style="color: #f39c12; font-weight: 500;">⭐ {{ movie.rating }}/10</span>
                 <span v-if="movie.voteCount && movie.voteCount > 0" style="color: #5a6c7d;">({{ movie.voteCount.toLocaleString() }} {{ $t('votes') }})</span>
@@ -276,11 +277,11 @@ function openProviderUrl(url: string) {
     <div v-else-if="activeTab === 'popular'">
       <div class="popular-list">
         <div v-for="movie in popularMovies" :key="movie.id" class="suggestion-item" @click="selectMovie(movie)" style="cursor:pointer; background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #e8e8e8; hover:box-shadow: 0 8px 25px rgba(0,0,0,0.15); hover:transform: translateY(-4px); hover:border-color: #27ae60;">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <img :src="movie.poster" :alt="movie.title" class="movie-img" style="width: 60px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s ease;" />
-            <div style="flex: 1;">
-              <div class="movie-title" style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; transition: color 0.3s ease;">{{ movie.title }}</div>
-              <div style="display: flex; align-items: center; gap: 12px; color: #7f8c8d; font-size: 0.85rem;">
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <img :src="movie.poster" :alt="movie.title" class="movie-img" style="width: 60px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s ease; flex-shrink: 0;" />
+            <div style="flex: 1; min-width: 0;">
+              <div class="movie-title" style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; transition: color 0.3s ease; word-wrap: break-word;">{{ movie.title }}</div>
+              <div style="display: flex; align-items: center; gap: 12px; color: #7f8c8d; font-size: 0.85rem; flex-wrap: wrap;">
                 <span>{{ movie.year || movie.releaseDate?.split('-')[0] || 'N/A' }}</span>
                 <span v-if="movie.rating && movie.rating > 0" style="color: #f39c12; font-weight: 500;">⭐ {{ movie.rating }}/10</span>
                 <span v-if="movie.voteCount && movie.voteCount > 0" style="color: #5a6c7d;">({{ movie.voteCount.toLocaleString() }} {{ $t('votes') }})</span>
@@ -292,16 +293,17 @@ function openProviderUrl(url: string) {
     </div>
     <Teleport to="body">
       <div v-if="selectedMovie">
-        <div class="modal-backdrop"></div>
+        <div class="modal-backdrop" @click="selectedMovie = null"></div>
         <div
           class="movie-details rule-box"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
           aria-describedby="modal-desc"
+          @click.stop
         >
           <div class="details-header">
-            <h3 id="modal-title" class="movie-title">{{ selectedMovie.title }}</h3>
+            <h3 id="modal-title" style="text-align: center" class="movie-title">{{ selectedMovie.title }}</h3>
             <button class="close-btn" @click="selectedMovie = null" aria-label="Close">&times;</button>
           </div>
           <p id="modal-desc" class="movie-overview">{{ selectedMovie.overview }}</p>
@@ -327,9 +329,9 @@ function openProviderUrl(url: string) {
     <Teleport to="body">
       <div v-if="showProvidersModal">
         <div class="modal-backdrop" @click="closeProvidersModal"></div>
-        <div class="movie-details rule-box" style="min-width:450px;max-width:550px" role="dialog" aria-modal="true">
+        <div class="movie-details rule-box" style="min-width:450px;max-width:550px" role="dialog" aria-modal="true" @click.stop>
           <div class="details-header" style="text-align:center;position:relative">
-            <h3 class="movie-title" style="margin:0;padding-right:40px">{{ $t('whereToWatch') }}</h3>
+            <h3 class="movie-title" style="margin:0;padding-right:40px;text-align:center">{{ $t('whereToWatch') }}</h3>
             <button class="close-btn" @click="closeProvidersModal" aria-label="Close" style="position:absolute;right:0;top:50%;transform:translateY(-50%)">&times;</button>
           </div>
           <div v-if="providersLoading" style="text-align:center;padding:24px 0">Loading...</div>
@@ -337,22 +339,19 @@ function openProviderUrl(url: string) {
           <div v-else-if="providers.length === 0" style="text-align:center;padding:24px 0">
             This movie is not currently available for streaming, rental, or purchase in your region.
           </div>
-          <div v-else class="providers-list" style="display:flex;flex-direction:column;gap:16px">
+          <div v-else class="providers-list">
             <div v-for="provider in getConsolidatedProviders()" :key="provider.name" 
-                 style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:#f8f9fa;transition:all 0.2s;cursor:pointer;border:1px solid transparent"
-                 @mouseenter="$event.target.style.borderColor='#4CAF50'"
-                 @mouseleave="$event.target.style.borderColor='transparent'"
                  @click="openProviderUrl(provider.url)">
-              <img :src="provider.icon" :alt="provider.name" style="width:32px;height:32px;border-radius:6px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.1)" />
-              <div style="flex:1">
-                <div style="font-weight:600;color:#333;font-size:14px">{{ provider.name }}</div>
-                <div style="font-size:12px;color:#666">
-                  <span v-if="provider.hasStreaming" style="color:#4CAF50;margin-right:8px">Streaming</span>
-                  <span v-if="provider.hasRent" style="color:#FF9800;margin-right:8px">Rent</span>
+              <img :src="provider.icon" :alt="provider.name" />
+              <div class="provider-info">
+                <div class="provider-name">{{ provider.name }}</div>
+                <div class="provider-options">
+                  <span v-if="provider.hasStreaming" style="color:#4CAF50">Streaming</span>
+                  <span v-if="provider.hasRent" style="color:#FF9800">Rent</span>
                   <span v-if="provider.hasBuy" style="color:#2196F3">Buy</span>
                 </div>
               </div>
-              <div style="font-size:12px;color:#999">→</div>
+              <div class="provider-arrow">→</div>
             </div>
           </div>
         </div>

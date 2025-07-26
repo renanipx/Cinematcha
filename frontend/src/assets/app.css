@@ -5,11 +5,13 @@ body {
   justify-content: center;
   background: #f6fefa;
   margin: 0;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .container {
   min-width: 0;
-  margin: 0 1rem;
+  margin: 0 auto;
   padding: 2.5rem 2rem;
   background: #ffffff ;
   border-radius: 18px;
@@ -18,10 +20,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  width: 100%;
+  max-width: 600px;
 }
 
 .lang-dropdown {
   margin-bottom: 1.2rem;
+  align-self: flex-end;
 }
 
 h1 {
@@ -30,6 +35,7 @@ h1 {
   margin-bottom: 1.2rem;
   letter-spacing: 1px;
   color: #263238;
+  line-height: 1.2;
 }
 
 .form-area {
@@ -114,8 +120,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 1.3em;
-  max-width: 340px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
 }
 .suggestion-item {
   display: flex;
@@ -128,8 +134,7 @@ button {
   min-height: 64px;
   transition: box-shadow 0.18s, transform 0.18s;
   width: 100%;
-  max-width: 340px;
-  margin: 0 auto;
+  box-sizing: border-box;
 }
 .suggestion-item:hover {
   box-shadow: 0 6px 24px rgba(46,204,64,0.13);
@@ -181,6 +186,7 @@ button {
   justify-content: center;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 .tabs button {
   background: #fff;
@@ -195,6 +201,8 @@ button {
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(34,139,34,0.04);
   outline: none;
+  flex: 1;
+  min-width: 80px;
 }
 .tabs button.active {
   background: #e6ffe6;
@@ -214,6 +222,7 @@ button {
   justify-content: center;
   gap: 0.5rem;
   margin-bottom: 1.2rem;
+  flex-wrap: wrap;
 }
 .sub-tabs button {
   background: #f8fafc;
@@ -225,6 +234,8 @@ button {
   border-radius: 8px;
   transition: background 0.2s, color 0.2s;
   outline: none;
+  flex: 1;
+  min-width: 80px;
 }
 .sub-tabs button.active {
   background: #e6ffe6;
@@ -237,82 +248,171 @@ button {
   color: #228b22;
 }
 
-@media (max-width: 600px) {
+/* Mobile First - Small screens */
+@media (max-width: 480px) {
+  body {
+    padding: 0.5rem;
+  }
+  
   .container {
-    max-width: 98vw;
-    padding: 1.2rem 0.5rem;
-    border-radius: 10px;
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+    margin: 0;
   }
+  
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
   .form-area {
-    flex-direction: column;
-    gap: 0.7rem;
-    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 1.5em;
   }
-  .query-input,
-  button {
-    width: 100%;
-    box-sizing: border-box;
+  
+  .query-input {
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+  }
+  
+  .form-area button {
+    font-size: 1rem;
+    padding: 0.8em 0;
+  }
+  
+  .suggestions h2 {
+    font-size: 1.1rem;
+  }
+  
+  .movie-title {
+    font-size: 1rem;
+  }
+  
+  .suggestion-item {
+    padding: 0.6em 0.8em;
+    gap: 0.8em;
+  }
+  
+  .movie-img {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .tabs {
+    gap: 0.3rem;
+  }
+  
+  .tabs button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .sub-tabs button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
   }
 }
 
-@media (min-width: 601px) and (max-width: 1024px) {
+/* Medium screens */
+@media (min-width: 481px) and (max-width: 768px) {
   .container {
-    max-width: 420px;
-    padding: 2.5rem 2rem;
+    padding: 2rem 1.5rem;
     border-radius: 16px;
   }
-  .suggestion-list, .suggestion-item {
-    max-width: 380px;
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  .suggestion-list {
+    max-width: 100%;
+  }
+  
+  .tabs button {
+    flex: 1;
+    min-width: 100px;
   }
 }
 
+/* Large screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    max-width: 500px;
+    padding: 2.5rem 2rem;
+    border-radius: 18px;
+  }
+  
+  .suggestion-list {
+    max-width: 100%;
+  }
+}
+
+/* Extra large screens */
 @media (min-width: 1025px) {
   .container {
     max-width: 600px;
-    padding: 5rem 3.5rem;
-    border-radius: 28px;
+    padding: 3rem 2.5rem;
+    border-radius: 20px;
     min-height: 700px;
     box-shadow: 0 8px 48px 0 rgba(34, 139, 34, 0.18), 0 1.5px 8px 0 rgba(0,0,0,0.10);
     transition: box-shadow 0.25s;
   }
+  
   .container:hover {
     box-shadow: 0 16px 64px 0 rgba(34, 139, 34, 0.22), 0 3px 16px 0 rgba(0,0,0,0.13);
   }
+  
   h1 {
-    font-size: 3.2rem;
-    margin-bottom: 2.2rem;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
   }
+  
   .form-area button {
-    font-size: 1.35em;
-    padding: 1.1em 0;
+    font-size: 1.2em;
+    padding: 0.9em 0;
   }
+  
   .suggestions h2 {
-    font-size: 1.7rem;
+    font-size: 1.5rem;
   }
+  
   .movie-title {
-    font-size: 1.35em;
+    font-size: 1.25em;
   }
-  .suggestion-list, .suggestion-item {
-    max-width: 520px;
-  }
+  
   .movie-img {
-    width: 72px;
-    height: 72px;
+    width: 60px;
+    height: 60px;
   }
 }
 
-@media (max-width: 400px) {
+/* Landscape orientation for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  body {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  
   .container {
-    padding: 0.7rem 0.2rem;
+    margin: 1rem auto;
+    max-height: 90vh;
+    overflow-y: auto;
   }
+  
   h1 {
-    font-size: 1.3rem;
+    font-size: 1.6rem;
+    margin-bottom: 0.8rem;
   }
-  .form-area button {
-    font-size: 1em;
-    padding: 0.5em 0;
+  
+  .suggestions {
+    margin-top: 1rem;
   }
-  .movie-title {
-    font-size: 1em;
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .movie-img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
-} 
+}

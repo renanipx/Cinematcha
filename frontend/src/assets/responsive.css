@@ -1,0 +1,325 @@
+/* Responsive Design Improvements */
+
+/* Touch-friendly improvements for mobile */
+@media (max-width: 768px) {
+  .suggestion-item {
+    min-height: 80px !important;
+  }
+  
+  .movie-img {
+    width: 70px !important;
+    height: 105px !important;
+  }
+  
+  .tabs button,
+  .sub-tabs button {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Improved spacing for very small screens */
+@media (max-width: 360px) {
+  .container {
+    padding: 1rem 0.8rem;
+  }
+  
+  h1 {
+    font-size: 1.6rem;
+  }
+  
+  .suggestion-item {
+    padding: 12px;
+  }
+  
+  .movie-img {
+    width: 50px !important;
+    height: 75px !important;
+  }
+  
+  .movie-title {
+    font-size: 1rem !important;
+  }
+}
+
+/* Extra small screens - 320px and below */
+@media (max-width: 320px) {
+  .close-btn {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    font-size: 1.8rem !important;
+    position: relative;
+    z-index: 1001;
+    margin: 4px !important;
+    padding: 8px !important;
+  }
+  
+  .close-btn::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    background: transparent;
+    z-index: -1;
+  }
+  
+  .movie-details.rule-box {
+    min-width: 320px !important;
+    /* width: 98vw !important; */
+    /* max-width: 98vw !important; */
+    margin: 0.5rem !important;
+    padding: 12px 8px !important;
+  }
+  
+  .details-header {
+    margin-bottom: 8px !important;
+  }
+  
+  .movie-title {
+    font-size: 1.1rem !important;
+    padding-right: 50px !important;
+  }
+  
+  .rule-box {
+    padding: 12px 8px !important;
+  }
+}
+
+/* Better handling for tablets in portrait mode */
+@media (min-width: 481px) and (max-width: 768px) and (orientation: portrait) {
+  .container {
+    max-width: 90vw;
+  }
+  
+  .suggestion-list {
+    max-width: 100%;
+  }
+}
+
+/* Improved modal positioning for different screen sizes */
+@media (max-width: 480px) {
+  .movie-details.rule-box {
+    margin: 1rem;
+    width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* Better text wrapping for long movie titles */
+.movie-title {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Improved accessibility for keyboard navigation */
+@media (prefers-reduced-motion: reduce) {
+  .suggestion-item,
+  .tabs button,
+  .sub-tabs button,
+  .close-btn {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .suggestion-item {
+    border: 2px solid #000;
+  }
+  
+  .tabs button.active {
+    border-bottom: 3px solid #000;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  .suggestion-item {
+    background: #2d2d2d;
+    color: #ffffff;
+  }
+  
+  .query-input {
+    background: #2d2d2d;
+    color: #ffffff;
+    border-color: #555;
+  }
+  
+  .query-input:focus {
+    border-color: #7ed957;
+  }
+}
+
+/* Print styles */
+@media print {
+  .lang-dropdown,
+  .tabs,
+  .sub-tabs,
+  .close-btn {
+    display: none !important;
+  }
+  
+  .container {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .suggestion-item {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
+
+/* Focus improvements for accessibility */
+.suggestion-item:focus,
+.tabs button:focus,
+.sub-tabs button:focus,
+.close-btn:focus {
+  outline: 2px solid #7ed957;
+  outline-offset: 2px;
+}
+
+/* Improved touch area for close button */
+.close-btn {
+  position: relative;
+}
+
+.close-btn::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: transparent;
+  z-index: -1;
+}
+
+@media (max-width: 480px) {
+  .close-btn::after {
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+  }
+}
+
+/* Loading state improvements */
+@media (max-width: 480px) {
+  .form-area button:disabled {
+    opacity: 0.4;
+  }
+}
+
+/* Better error handling for images */
+.movie-img {
+  background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+              linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+              linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+              linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Provider list improvements */
+.providers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.providers-list > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: 1px solid transparent;
+  flex-wrap: wrap;
+}
+
+.providers-list > div:hover {
+  border-color: #4CAF50;
+  background: #f0f8f0;
+}
+
+.providers-list img {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.providers-list .provider-info {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.providers-list .provider-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  word-wrap: break-word;
+  margin-bottom: 4px;
+}
+
+.providers-list .provider-options {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.providers-list .provider-arrow {
+  font-size: 12px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+/* Responsive improvements for providers */
+@media (max-width: 480px) {
+  .providers-list > div {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .providers-list img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .providers-list .provider-name {
+    font-size: 13px;
+  }
+  
+  .providers-list .provider-options {
+    font-size: 11px;
+  }
+} 
