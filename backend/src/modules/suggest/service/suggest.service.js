@@ -18,6 +18,13 @@ async function fetchMovieDetailsFromTMDB(title, language = 'en-US') {
     poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
     overview: movie.overview,
     trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
+    year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+    releaseDate: movie.release_date,
+    rating: Math.round(movie.vote_average * 10) / 10,
+    voteCount: movie.vote_count,
+    popularity: movie.popularity,
+    originalTitle: movie.original_title,
+    hasVideo: movie.video
   };
 }
 
@@ -77,13 +84,32 @@ async function suggestMovies(preferences, language = 'en-US') {
 
 async function getTrendingMovies(period = 'day', language = 'en-US') {
   try {
-    const url = `${process.env.TMDB_API_URL}/trending/movie/${period}?api_key=${process.env.TMDB_API_KEY}&language=en-US`;
+    const url = `${process.env.TMDB_API_URL}/trending/movie/${period}?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
     const res = await axios.get(url);
     const validatedMovies = [];
     for (const movie of res.data.results) {
       try {
-        const details = await fetchMovieDetailsFromTMDB(movie.title, language);
-        if (details && details.poster && details.overview && details.trailer) {
+        // Get trailer for this specific movie
+        const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
+        const videosRes = await axios.get(videosUrl);
+        const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        
+        const details = {
+          title: movie.title,
+          id: movie.id,
+          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+          overview: movie.overview,
+          trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
+          year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+          releaseDate: movie.release_date,
+          rating: Math.round(movie.vote_average * 10) / 10,
+          voteCount: movie.vote_count,
+          popularity: movie.popularity,
+          originalTitle: movie.original_title,
+          hasVideo: movie.video
+        };
+        
+        if (details.poster && details.overview) {
           validatedMovies.push(details);
         }
       } catch (movieError) {
@@ -101,13 +127,32 @@ async function getTrendingMovies(period = 'day', language = 'en-US') {
 
 async function getPopularMovies(language = 'en-US') {
   try {
-    const url = `${process.env.TMDB_API_URL}/movie/popular?api_key=${process.env.TMDB_API_KEY}&language=en-US`;
+    const url = `${process.env.TMDB_API_URL}/movie/popular?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
     const res = await axios.get(url);
     const validatedMovies = [];
     for (const movie of res.data.results) {
       try {
-        const details = await fetchMovieDetailsFromTMDB(movie.title, language);
-        if (details && details.poster && details.overview && details.trailer) {
+        // Get trailer for this specific movie
+        const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
+        const videosRes = await axios.get(videosUrl);
+        const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        
+        const details = {
+          title: movie.title,
+          id: movie.id,
+          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+          overview: movie.overview,
+          trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
+          year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+          releaseDate: movie.release_date,
+          rating: Math.round(movie.vote_average * 10) / 10,
+          voteCount: movie.vote_count,
+          popularity: movie.popularity,
+          originalTitle: movie.original_title,
+          hasVideo: movie.video
+        };
+        
+        if (details.poster && details.overview) {
           validatedMovies.push(details);
         }
       } catch (movieError) {
@@ -126,20 +171,8 @@ async function getPopularMovies(language = 'en-US') {
 async function getWatchProviders(movieId, country = 'BR') {
   const url = `${process.env.TMDB_API_URL}/movie/${movieId}/watch/providers?api_key=${process.env.TMDB_API_KEY}`;
   const res = await axios.get(url);
-  console.log(`TMDB Watch Providers - Movie ID: ${movieId}, Country: ${country}`);
-  console.log('TMDB Response:', JSON.stringify(res.data, null, 2));
   const data = res.data.results && res.data.results[country];
-  console.log(`Data for country ${country}:`, data);
   if (!data) {
-    console.log('No providers found for this movie. Testing with a popular movie...');
-    // Test with a popular movie (Fight Club - ID: 550) to verify functionality
-    const testUrl = `${process.env.TMDB_API_URL}/movie/550/watch/providers?api_key=${process.env.TMDB_API_KEY}`;
-    const testRes = await axios.get(testUrl);
-    const testData = testRes.data.results && testRes.data.results[country];
-    console.log('Test movie providers:', testData);
-    if (testData) {
-      console.log('Provider functionality is working - the original movie just has no providers');
-    }
     return [];
   }
   const allProviders = [];
