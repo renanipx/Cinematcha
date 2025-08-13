@@ -3,10 +3,6 @@
   "button": "Suggest me a movie",
   "suggestions": "Suggestions",
   "noResults": "No suggestions yet.",
-  "movie": {
-    "inception": "Inception",
-    "interstellar": "Interstellar"
-  },
   "tab": {
     "search": "Search",
     "trending": "Trending",

@@ -3,10 +3,6 @@
   "button": "Me sugira um filme",
   "suggestions": "Sugestões",
   "noResults": "Nenhuma sugestão ainda.",
-  "movie": {
-    "inception": "A Origem",
-    "interstellar": "Interestelar"
-  },
   "tab": {
     "search": "Pesquisar",
     "trending": "Tendências",

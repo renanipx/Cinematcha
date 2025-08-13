@@ -39,12 +39,10 @@ async function suggestMovies(preferences, language = 'en-US') {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
       let prompt;
-      if ((language && language.toLowerCase().startsWith('pt'))) {
-        prompt = `O usuário solicitou filmes semelhantes a: "${JSON.stringify(preferences)}". 
-                 Analise o gênero, o estilo, os temas centrais, a narrativa e o enredo desse filme. Com base nisso, recomende 10 filmes populares e recentes que tenham características semelhantes e que provavelmente existam na base do TMDB. Retorne apenas os títulos dos filmes, separados por vírgula.`;
+      if (language && language.toLowerCase().startsWith('pt')) {
+        prompt = process.env.PROMPT_PT.replace('{{preferences}}', JSON.stringify(preferences));
       } else {
-        prompt = `The user requested movies similar to: "${JSON.stringify(preferences)}". 
-                 Analyze the genre, style, core themes, narrative, and plot of this movie. Based on that, recommend 10 recent and popular movies that share similar characteristics and most likely exist in the TMDB database. Return only the movie titles, separated by commas.`;
+        prompt = process.env.PROMPT_EN.replace('{{preferences}}', JSON.stringify(preferences));
       }
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -93,7 +91,7 @@ async function getTrendingMovies(period = 'day', language = 'en-US') {
         const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
         const videosRes = await axios.get(videosUrl);
         const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-        
+
         const details = {
           title: movie.title,
           id: movie.id,
@@ -108,7 +106,7 @@ async function getTrendingMovies(period = 'day', language = 'en-US') {
           originalTitle: movie.original_title,
           hasVideo: movie.video
         };
-        
+
         if (details.poster && details.overview) {
           validatedMovies.push(details);
         }
@@ -136,7 +134,7 @@ async function getPopularMovies(language = 'en-US') {
         const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
         const videosRes = await axios.get(videosUrl);
         const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-        
+
         const details = {
           title: movie.title,
           id: movie.id,
@@ -151,7 +149,7 @@ async function getPopularMovies(language = 'en-US') {
           originalTitle: movie.original_title,
           hasVideo: movie.video
         };
-        
+
         if (details.poster && details.overview) {
           validatedMovies.push(details);
         }
@@ -176,7 +174,7 @@ async function getWatchProviders(movieId, country = 'BR') {
     return [];
   }
   const allProviders = [];
- 
+
   if (data.flatrate) {
     for (const p of data.flatrate) {
       allProviders.push({
