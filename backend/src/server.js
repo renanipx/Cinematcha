@@ -1,17 +1,27 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
+const config = require('./config/env.config');
 const suggestRouter = require('./modules/suggest/controller/suggest.controller');
-dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message
+  });
+});
+
+// Routes
 app.use('/suggest', suggestRouter);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-}); 
+// Start server
+app.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
+});

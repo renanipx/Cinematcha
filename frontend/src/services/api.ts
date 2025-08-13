@@ -3,11 +3,11 @@ import { ref } from 'vue'
 const API_URL = import.meta.env.VITE_API_URL
 
 export const api = {
-  async suggestMovies(query: string, language: string) {
+  async suggestMovies(prompt: string, locale: string) {
     const response = await fetch(`${API_URL}/suggest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, language })
+      body: JSON.stringify({ prompt, locale })
     })
     if (!response.ok) throw new Error('Failed to fetch suggestions')
     return response.json()

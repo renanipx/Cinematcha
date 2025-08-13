@@ -1,46 +1,49 @@
 const express = require('express');
-const router = express.Router();
 const suggestService = require('../service/suggest.service');
 
-router.post('/', async (req, res) => {
+const router = express.Router();
+
+router.post('/', async (req, res, next) => {
   try {
-    const { query, language } = req.body;
-    const movies = await suggestService.suggestMovies({ query }, language); 
+    const { prompt, locale } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
+    const movies = await suggestService.suggestMovies(prompt, locale);
     res.json(movies);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
-router.get('/tmdb/trending', async (req, res) => {
+router.get('/tmdb/trending', async (req, res, next) => {
   try {
-    const { period = 'day', language = 'en-US' } = req.query;
-    const movies = await suggestService.getTrendingMovies(period, language);
+    const { locale } = req.query;
+    const movies = await suggestService.getTrendingMovies(locale);
     res.json(movies);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
-router.get('/tmdb/popular', async (req, res) => {
+router.get('/tmdb/popular', async (req, res, next) => {
   try {
-    const { language = 'en-US' } = req.query;
-    const movies = await suggestService.getPopularMovies(language);
+    const { locale } = req.query;
+    const movies = await suggestService.getPopularMovies(locale);
     res.json(movies);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
-router.get('/tmdb/providers/:movieId', async (req, res) => {
+router.get('/tmdb/providers/:movieId', async (req, res, next) => {
   try {
     const { movieId } = req.params;
-    const { country = 'BR' } = req.query;
-    const providers = await suggestService.getWatchProviders(movieId, country);
+    const providers = await suggestService.getWatchProviders(movieId);
     res.json(providers);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
-module.exports = router; 
+module.exports = router;

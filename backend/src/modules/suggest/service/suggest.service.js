@@ -1,211 +1,61 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const axios = require('axios');
+const config = require('../../../config/env.config');
+const tmdbService = require('../../tmdb/tmdb.service');
 
-async function fetchMovieDetailsFromTMDB(title, language = 'en-US') {
-  const searchUrl = `${process.env.TMDB_API_URL}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=${language}`;
-  const searchRes = await axios.get(searchUrl);
-  const movie = searchRes.data.results && searchRes.data.results[0];
-  if (!movie) return null;
+class SuggestService {
+  constructor() {
+    this.genAI = new GoogleGenerativeAI(config.gemini.apiKey);
+  }
 
-  // Search for trailer
-  const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
-  const videosRes = await axios.get(videosUrl);
-  const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-
-  return {
-    title: movie.title,
-    id: movie.id,
-    poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-    overview: movie.overview,
-    trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
-    year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
-    releaseDate: movie.release_date,
-    rating: Math.round(movie.vote_average * 10) / 10,
-    voteCount: movie.vote_count,
-    popularity: movie.popularity,
-    originalTitle: movie.original_title,
-    hasVideo: movie.video
-  };
-}
-
-async function suggestMovies(preferences, language = 'en-US') {
-  try {
-    if (!process.env.TMDB_API_KEY) {
-      throw new Error('TMDB API key not configured. Please check your .env file.');
-    }
-
-    let movieNames = [];
+  async suggestMovies(preferences, language = 'en') {
     try {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-      let prompt;
-      if (language && language.toLowerCase().startsWith('pt')) {
-        prompt = process.env.PROMPT_PT.replace('{{preferences}}', JSON.stringify(preferences));
-      } else {
-        prompt = process.env.PROMPT_EN.replace('{{preferences}}', JSON.stringify(preferences));
-      }
+      const isPt = language && language.toLowerCase().startsWith('pt');
+      const prompt = (isPt ? config.prompts.pt : config.prompts.en).replace('{{preferences}}', JSON.stringify(preferences));
       const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const responseText = response.text();
-      const aiMovieNames = responseText.split(',').map(s => s.trim()).filter(name => name.length > 0);
-      if (aiMovieNames.length > 0) {
-        movieNames = aiMovieNames;
-      } else {
-        throw new Error('No movie names returned by Gemini AI.');
-      }
+      const responseText = (await result.response).text();
+      const aiMovieNames = responseText.split(',').map(s => s.trim()).filter(Boolean);
+      if (!aiMovieNames.length) throw new Error('No movie names returned by Gemini AI.');
+      const locale = isPt ? 'pt-BR' : 'en-US';
+      const movies = await Promise.all(aiMovieNames.map(async title => {
+        const movie = await tmdbService.searchMovie(title, locale);
+        if (!movie) return null;
+        const trailer = await tmdbService.getMovieTrailer(movie.id, locale);
+        return tmdbService.formatMovieDetails(movie, trailer);
+      }));
+      return movies.filter(Boolean);
     } catch (aiError) {
       throw new Error('Gemini AI service unavailable or returned no results: ' + aiError.message);
     }
+  }
 
-    // Validate and fetch details from TMDB
-    const validatedMovies = [];
-    for (const name of movieNames) {
-      try {
-        const details = await fetchMovieDetailsFromTMDB(name, language);
-        if (details && details.poster && details.overview && details.trailer) {
-          validatedMovies.push(details);
-        }
-      } catch (movieError) {
-        console.log(`Error fetching details for ${name}:`, movieError.message);
-      }
-    }
+  async getTrendingMovies(locale = 'en') {
+    const movies = await tmdbService.getTrendingMovies('day', locale === 'pt' ? 'pt-BR' : 'en-US');
+    const moviesWithTrailers = await Promise.all(
+      movies.map(async (movie) => {
+        const trailer = await tmdbService.getMovieTrailer(movie.id, locale === 'pt' ? 'pt-BR' : 'en-US');
+        return tmdbService.formatMovieDetails(movie, trailer);
+      })
+    );
+    return moviesWithTrailers;
+  }
 
-    if (validatedMovies.length === 0) {
-      throw new Error('No movies found. Please check your TMDB API key or the Gemini AI response.');
-    }
+  async getPopularMovies(locale = 'en') {
+    const movies = await tmdbService.getPopularMovies(locale === 'pt' ? 'pt-BR' : 'en-US');
+    const moviesWithTrailers = await Promise.all(
+      movies.map(async (movie) => {
+        const trailer = await tmdbService.getMovieTrailer(movie.id, locale === 'pt' ? 'pt-BR' : 'en-US');
+        return tmdbService.formatMovieDetails(movie, trailer);
+      })
+    );
+    return moviesWithTrailers;
+  }
 
-    return validatedMovies;
-  } catch (error) {
-    throw new Error(`Suggestion service error: ${error.message}`);
+  async getWatchProviders(movieId) {
+    const providers = await tmdbService.getWatchProviders(movieId);
+    return tmdbService.formatProviders(providers);
   }
 }
 
-async function getTrendingMovies(period = 'day', language = 'en-US') {
-  try {
-    const url = `${process.env.TMDB_API_URL}/trending/movie/${period}?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
-    const res = await axios.get(url);
-    const validatedMovies = [];
-    for (const movie of res.data.results) {
-      try {
-        // Get trailer for this specific movie
-        const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
-        const videosRes = await axios.get(videosUrl);
-        const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-
-        const details = {
-          title: movie.title,
-          id: movie.id,
-          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-          overview: movie.overview,
-          trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
-          year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
-          releaseDate: movie.release_date,
-          rating: Math.round(movie.vote_average * 10) / 10,
-          voteCount: movie.vote_count,
-          popularity: movie.popularity,
-          originalTitle: movie.original_title,
-          hasVideo: movie.video
-        };
-
-        if (details.poster && details.overview) {
-          validatedMovies.push(details);
-        }
-      } catch (movieError) {
-        console.log(`Error fetching details for ${movie.title}:`, movieError.message);
-      }
-    }
-    if (validatedMovies.length === 0) {
-      throw new Error('No trending movies found with complete details.');
-    }
-    return validatedMovies;
-  } catch (error) {
-    throw new Error('Failed to fetch trending movies from TMDB: ' + error.message);
-  }
-}
-
-async function getPopularMovies(language = 'en-US') {
-  try {
-    const url = `${process.env.TMDB_API_URL}/movie/popular?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
-    const res = await axios.get(url);
-    const validatedMovies = [];
-    for (const movie of res.data.results) {
-      try {
-        // Get trailer for this specific movie
-        const videosUrl = `${process.env.TMDB_API_URL}/movie/${movie.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=${language}`;
-        const videosRes = await axios.get(videosUrl);
-        const trailer = (videosRes.data.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-
-        const details = {
-          title: movie.title,
-          id: movie.id,
-          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-          overview: movie.overview,
-          trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
-          year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
-          releaseDate: movie.release_date,
-          rating: Math.round(movie.vote_average * 10) / 10,
-          voteCount: movie.vote_count,
-          popularity: movie.popularity,
-          originalTitle: movie.original_title,
-          hasVideo: movie.video
-        };
-
-        if (details.poster && details.overview) {
-          validatedMovies.push(details);
-        }
-      } catch (movieError) {
-        console.log(`Error fetching details for ${movie.title}:`, movieError.message);
-      }
-    }
-    if (validatedMovies.length === 0) {
-      throw new Error('No popular movies found with complete details.');
-    }
-    return validatedMovies;
-  } catch (error) {
-    throw new Error('Failed to fetch popular movies from TMDB: ' + error.message);
-  }
-}
-
-async function getWatchProviders(movieId, country = 'BR') {
-  const url = `${process.env.TMDB_API_URL}/movie/${movieId}/watch/providers?api_key=${process.env.TMDB_API_KEY}`;
-  const res = await axios.get(url);
-  const data = res.data.results && res.data.results[country];
-  if (!data) {
-    return [];
-  }
-  const allProviders = [];
-
-  if (data.flatrate) {
-    for (const p of data.flatrate) {
-      allProviders.push({
-        name: p.provider_name,
-        type: 'stream',
-        url: data.link,
-        icon: `https://image.tmdb.org/t/p/w92${p.logo_path}`
-      });
-    }
-  }
-  if (data.rent) {
-    for (const p of data.rent) {
-      allProviders.push({
-        name: p.provider_name,
-        type: 'rent',
-        url: data.link,
-        icon: `https://image.tmdb.org/t/p/w92${p.logo_path}`
-      });
-    }
-  }
-  if (data.buy) {
-    for (const p of data.buy) {
-      allProviders.push({
-        name: p.provider_name,
-        type: 'buy',
-        url: data.link,
-        icon: `https://image.tmdb.org/t/p/w92${p.logo_path}`
-      });
-    }
-  }
-  return allProviders;
-}
-
-module.exports = { suggestMovies, getTrendingMovies, getPopularMovies, getWatchProviders }; 
+module.exports = new SuggestService();
