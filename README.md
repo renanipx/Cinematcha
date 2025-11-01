@@ -51,6 +51,31 @@ Create a `.env` file in `frontend/` with:
 VITE_API_URL=http://localhost:3001
 ```
 
+## Docker
+
+You can run both backend and frontend using Docker and Docker Compose.
+
+### Build and Start All Services
+```bash
+docker-compose up --build
+```
+- The backend will be available at `http://localhost:3001`
+- The frontend will be available at `http://localhost:5173`
+
+### Backend Only
+```bash
+cd backend
+docker build -t cinematcha-backend .
+docker run -p 3001:3001 --env-file .env cinematcha-backend
+```
+
+### Frontend Only
+```bash
+cd frontend
+docker build -t cinematcha-frontend .
+docker run -p 5173:5173 cinematcha-frontend
+```
+
 ## Usage
 
 ### Start the backend
@@ -71,6 +96,16 @@ Access: http://localhost:5173
 - Backend: `npm start` (Express on port 3001)
 - Frontend: `npm run dev` (Vite on port 5173)
 
+## Testing
+
+### Run backend tests
+```bash
+cd backend
+npm test
+```
+- Jest will run all unit and integration tests.
+- Coverage reports are generated in `backend/coverage/`.
+
 ## Notes
 - The backend depends on properly configured environment variables and API keys.
 - The frontend communicates with the backend via REST.
@@ -87,4 +122,4 @@ LinkedIn: [https://www.linkedin.com/in/renanccavalcanti/](https://www.linkedin.c
 
 ---
 
-> Academic/demo project. Do not use sensitive keys in production without proper protection. 
+> Academic/demo project. Do not use sensitive keys in production without proper protection.
